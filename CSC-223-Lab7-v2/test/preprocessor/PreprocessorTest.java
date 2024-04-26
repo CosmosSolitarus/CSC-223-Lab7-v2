@@ -6,9 +6,12 @@ import org.junit.Test;
 import components.FigureNode;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import geometry_objects.Segment;
 import geometry_objects.points.Point;
@@ -165,7 +168,51 @@ public class PreprocessorTest
 
 	@Test
 	public void makeSegmentsTest() {
-		fail();
+		/**
+		 * 		B-------C     E
+		 * 		|		|    /
+		 * 		|		|   /
+		 * 		A		|  /
+		 * 	   (0,0)	| /
+		 * 				|/
+		 * 				D
+		 */
+
+		Point a = new Point(0, 0);
+		Point b = new Point(0, 1);
+		Point c = new Point(1, 1);
+		Point d = new Point(1, -2);
+		Point e = new Point(2, 1);
+
+		List<Point> points = new ArrayList<>();
+
+		points.add(a);
+		points.add(b);
+		points.add(c);
+		points.add(d);
+		points.add(e);
+
+		SortedSet<Point> sortedPoints = new TreeSet(points);
+
+		Set<Segment> segments = Preprocessor.makeSegments(sortedPoints);
+
+		Set<Segment> expectedSegments = new HashSet<>();
+
+		Segment ab = new Segment(a, b);
+		Segment bc = new Segment(b, c);
+		Segment cd = new Segment(c, d);
+		Segment de = new Segment(d, e);
+
+		expectedSegments.add(ab);
+		expectedSegments.add(bc);
+		expectedSegments.add(cd);
+		expectedSegments.add(de);
+
+		assertEquals(expectedSegments.size(), segments.size());
+
+		for (Segment segment : expectedSegments) {
+			assertTrue(segments.contains(segment));
+		}
 	}
 
 	@Test
@@ -193,40 +240,10 @@ public class PreprocessorTest
 		Segment bd = new Segment(b, d);
 		Segment cd = new Segment(c, d);
 
-		assertEquals(ac, combineToNewSegment(ab, ac));
-		assertEquals(ac, combineToNewSegment(ac, ab));
-		assertEquals(ad, combineToNewSegment(ab, bd));
-		assertEquals(ad, combineToNewSegment(ac, cd));
-		assertEquals(bc, combineToNewSegment(bc, bc));
-	}
-
-	//
-	// Our goal is to stitch together segments that are on the same line:
-	//                       A---------B----------C
-	// resulting in the segment AC.
-	//
-	// To do so we ask:
-	//    * Are each segment on the same (infinite) line?
-	//    * If so, do they share an endpoint?
-	// If both criteria are satisfied we have a new segment.
-	private Segment combineToNewSegment(Segment left, Segment right)
-	{	
-		// 1 - check equality
-		if (left.equals(right)) return left;
-		
-		// 2 - check collinearity
-		if (!left.isCollinearWith(right)) return null;
-
-		// 3 - check for shared point
-		Point shared = left.sharedVertex(right);
-
-		if (shared == null) return null;
-
-		// 4 - check if one is subsegment of other
-		if (left.HasSubSegment(right)) return left;
-		if (right.HasSubSegment(left)) return right;
-
-		//  - find points of new segment and return
-		return new Segment(left.other(shared), right.other(shared));
+		assertEquals(ac, Preprocessor.combineToNewSegment(ab, ac));
+		assertEquals(ac, Preprocessor.combineToNewSegment(ac, ab));
+		assertEquals(ad, Preprocessor.combineToNewSegment(ab, bd));
+		assertEquals(ad, Preprocessor.combineToNewSegment(ac, cd));
+		assertEquals(bc, Preprocessor.combineToNewSegment(bc, bc));
 	}
 }

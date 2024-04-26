@@ -136,8 +136,10 @@ public class Preprocessor
 	 *   
 	 * @param points -- an ordered list of points
 	 * @return a set of n-1 segments between all points provided
+	 * 
+	 * STATIC FOR TESTING
 	 */
-	protected Set<Segment> makeSegments(SortedSet<Point> points)
+	protected static Set<Segment> makeSegments(SortedSet<Point> points)
 	{
         Set<Segment> segments = new HashSet<>();
 
@@ -252,7 +254,8 @@ public class Preprocessor
 	//    * Are each segment on the same (infinite) line?
 	//    * If so, do they share an endpoint?
 	// If both criteria are satisfied we have a new segment.
-	private Segment combineToNewSegment(Segment left, Segment right)
+	// PUBLIC + STATIC FOR TESTING
+	public static Segment combineToNewSegment(Segment left, Segment right)
 	{	
 		// 1 - check equality
 		if (left.equals(right)) return left;
