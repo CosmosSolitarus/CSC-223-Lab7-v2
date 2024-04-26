@@ -1,0 +1,59 @@
+//   		A
+//		   / \
+//		  B   \
+// 		 / \   \
+//      C   \   \
+// 	   / \   \   \ 
+//    D---E---F---G   
+{
+  "Figure" :
+  {
+    "Description" : "A triangle with two segments inside of it",
+    "Points" :
+	  [
+	    {
+          "name" : "A",
+          "x" : 3,
+          "y" : 6
+        },
+	    {
+	      "name" : "B",
+		  "x" : 2,
+   	      "y" : 4
+		},
+	    {
+	      "name" : "C",
+		  "x" : 1,
+   	      "y" : 2
+		},
+	    {
+	      "name" : "D",
+		  "x" : 0,
+   	      "y" : 0
+		},
+        {
+          "name" : "E",
+          "x" : 2,
+          "y" : 0
+        },
+        {
+	      "name" : "F",
+		  "x" : 4,
+   	      "y" : 0
+		},
+		{
+	      "name" : "G",
+		  "x" : 6,
+   	      "y" : 0
+		}
+	  ],
+  
+    "Segments" :
+      [
+	    {"A" : ["D", "G"] },
+	    {"B" : ["F"]},
+        {"C" : ["E"] },
+        {"D" : ["G"]}
+      ]
+  }
+}
