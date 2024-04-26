@@ -71,7 +71,8 @@ public class Segment extends GeometricObject
 	 */
 	public boolean HasSubSegment(Segment candidate)
 	{
-        // TODO
+        if (candidate == null) return false;
+		return pointLiesOn(candidate._point1) && pointLiesOn(candidate._point2);
 	}
 
 	/**
@@ -84,6 +85,8 @@ public class Segment extends GeometricObject
 	 */
 	public Point sharedVertex(Segment that)
 	{
+		if (that == null) return null;
+
 		if (this.equals(that)) return null;
 
 		if (_point1.equals(that._point1)) return _point1;
@@ -141,7 +144,7 @@ public class Segment extends GeometricObject
 	@Override
 	public int hashCode()
 	{
-		return _point1.hashCode() +_point2.hashCode();
+		return _point1.hashCode() + _point2.hashCode();
 	}
 
 	/*
@@ -160,7 +163,17 @@ public class Segment extends GeometricObject
 	 */
 	public boolean coincideWithoutOverlap(Segment that)
 	{
-        // TODO
+		if (that == null) return false;
+
+		if (equals(that)) return false;
+
+		if (!isCollinearWith(that)) return false;
+
+		if (pointLiesBetweenEndpoints(that._point1) || pointLiesBetweenEndpoints(that._point2)) return false;
+
+		if (that.pointLiesBetweenEndpoints(_point1) || that.pointLiesBetweenEndpoints(_point2)) return false;
+
+		return true;
 	}
 	
 	/**
@@ -182,10 +195,21 @@ public class Segment extends GeometricObject
 	 */
 	public SortedSet<Point> collectOrderedPointsOnSegment(Set<Point> points)
 	{
+		if (points == null) return null;
+		
 		SortedSet<Point> pointsOn = new TreeSet<Point>();
 
-        // TODO
+        for (Point point : points) {
+			if (pointLiesOnSegment(point)) {
+				pointsOn.add(point);
+			}
+		}
 
 		return pointsOn;
+	}
+
+	@Override
+	public String toString() {
+		return _point1.toString() + " ------- " + _point2;
 	}
 }

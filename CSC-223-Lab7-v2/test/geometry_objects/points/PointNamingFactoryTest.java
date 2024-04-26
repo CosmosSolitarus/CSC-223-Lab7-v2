@@ -58,8 +58,6 @@ public class PointNamingFactoryTest {
         assertFalse(pnf.get(pt0).isGenerated());
         assertFalse(pnf.get(pt1).isGenerated());
 
-        System.out.println(pnf.get(pt2));
-
         assertTrue(pnf.get(pt2).isGenerated());
         assertEquals(pnf.get(pt2)._name, "*_A");
     }

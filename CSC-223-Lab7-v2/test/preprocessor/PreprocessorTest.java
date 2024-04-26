@@ -21,7 +21,6 @@ public class PreprocessorTest
 	@Test
 	public void test_implicit_crossings()
 	{
-		// TODO: Update this file path for your particular project
 		FigureNode fig = InputFacade.extractFigure("fully_connected_irregular_polygon.json");
 
 		Map.Entry<PointDatabase, Set<Segment>> pair = InputFacade.toGeometryRepresentation(fig);
@@ -110,6 +109,7 @@ public class PreprocessorTest
 
 		for (Segment minimalSeg : minimalSegments)
 		{
+			System.out.println(minimalSeg.toString());
 			assertTrue(expectedMinimalSegments.contains(minimalSeg));
 		}
 		
@@ -160,21 +160,73 @@ public class PreprocessorTest
 
 	@Test
 	public void computeImplicitBaseSegmentsTest() {
-
+		fail();
 	}
 
 	@Test
 	public void makeSegmentsTest() {
-
+		fail();
 	}
 
 	@Test
 	public void identifyAllMinimalSegmentsTest() {
-
+		fail();
 	}
 
 	@Test
 	public void constructAllNonMinimalSegmentsTest() {
+		fail();
+	}
 
+	@Test
+	public void combineToNewSegmentTest() {
+		// A----B----C----D
+		Point a = new Point("A", 0, 0);
+		Point b = new Point("B", 1, 0);
+		Point c = new Point("C", 2, 0);
+		Point d = new Point("D", 3, 0);
+
+		Segment ab = new Segment(a, b);
+		Segment ac = new Segment(a, c);
+		Segment ad = new Segment(a, d);
+		Segment bc = new Segment(b, c);
+		Segment bd = new Segment(b, d);
+		Segment cd = new Segment(c, d);
+
+		assertEquals(ac, combineToNewSegment(ab, ac));
+		assertEquals(ac, combineToNewSegment(ac, ab));
+		assertEquals(ad, combineToNewSegment(ab, bd));
+		assertEquals(ad, combineToNewSegment(ac, cd));
+		assertEquals(bc, combineToNewSegment(bc, bc));
+	}
+
+	//
+	// Our goal is to stitch together segments that are on the same line:
+	//                       A---------B----------C
+	// resulting in the segment AC.
+	//
+	// To do so we ask:
+	//    * Are each segment on the same (infinite) line?
+	//    * If so, do they share an endpoint?
+	// If both criteria are satisfied we have a new segment.
+	private Segment combineToNewSegment(Segment left, Segment right)
+	{	
+		// 1 - check equality
+		if (left.equals(right)) return left;
+		
+		// 2 - check collinearity
+		if (!left.isCollinearWith(right)) return null;
+
+		// 3 - check for shared point
+		Point shared = left.sharedVertex(right);
+
+		if (shared == null) return null;
+
+		// 4 - check if one is subsegment of other
+		if (left.HasSubSegment(right)) return left;
+		if (right.HasSubSegment(left)) return right;
+
+		//  - find points of new segment and return
+		return new Segment(left.other(shared), right.other(shared));
 	}
 }

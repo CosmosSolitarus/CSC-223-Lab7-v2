@@ -16,13 +16,27 @@ public class ImplicitPointPreprocessor
 	 * points and name them.
 	 * 
 	 * Algorithm:
-	 *    TODO
+	 * 		Check if each segment intersects with any other. If yes,
+	 * 		add the intersection point to PointDatabase.
 	 */
 	public static Set<Point> compute(PointDatabase givenPoints, List<Segment> givenSegments)
 	{
 		Set<Point> implicitPoints = new LinkedHashSet<Point>();
+		int size = givenSegments.size();
 
-        // TODO
+        for (int i = 0; i < size; i++) {
+			for (int j = i + 1; j < size; j++) {
+				Segment a = givenSegments.get(i);
+				Segment b = givenSegments.get(j);
+
+				Point pt = a.segmentIntersection(b);
+				
+				if (pt != null) {
+					implicitPoints.add(pt);
+					givenPoints.put(pt.getName(), pt.getX(), pt.getY());
+				}
+			}
+		}
 
 		return implicitPoints;
 	}
