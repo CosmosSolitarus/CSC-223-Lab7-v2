@@ -23,7 +23,7 @@ public class ImplicitPointPreprocessorTest {
         // |/    \|
         // D------C
 
-        FigureNode fig = InputFacade.extractFigure("square_four_interior_implied.json");
+        FigureNode fig = InputFacade.extractFigure("figures\\square_four_interior_implied.json");
 
 		Map.Entry<PointDatabase, Set<Segment>> pair = InputFacade.toGeometryRepresentation(fig);
 
