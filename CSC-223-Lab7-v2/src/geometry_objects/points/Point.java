@@ -3,9 +3,12 @@ package geometry_objects.points;
 import utilities.math.MathUtilities;
 
 /**
- * Serves as a 2-D geometrical object, differentiated from the input-based PointNode class.
- * @author Case Riddle, Jackson Tedesco, Della Avent
- * @date 3/19/2024
+ * A 2D Point (x, y) only.
+ * 
+ * Points are ordered lexicographically (thus implementing the Comparable interface)
+ * 
+ * @author	Jack
+ * @date	3/19/24
  */
 public class Point implements Comparable<Point>
 {
@@ -28,14 +31,17 @@ public class Point implements Comparable<Point>
 
 	// BasicPoint objects are named points (from input)
 	// ImpliedPoint objects are unnamed points (from input)
-	public boolean isGenerated() { return false; }
+	public boolean isGenerated() { return _name.substring(0, 2).equals("*_"); }
 
 	/**
 	 * Create a new Point with the specified coordinates.
 	 * @param x The X coordinate
 	 * @param y The Y coordinate
 	 */
-	public Point(double x, double y) { this(ANONYMOUS, x, y); }
+	public Point(double x, double y)
+	{
+		this(ANONYMOUS, x, y);
+	}
 
 	/**
 	 * Create a new Point with the specified coordinates.
@@ -43,10 +49,11 @@ public class Point implements Comparable<Point>
 	 * @param x -- The X coordinate
 	 * @param y -- The Y coordinate
 	 */
-	public Point(String name, double x, double y) {
+	public Point(String name, double x, double y)
+	{
 		_name = (name == null || name == "") ? ANONYMOUS : name;
-		this._x = x;
-		this._y = y;
+		_x = MathUtilities.removeLessEpsilon(x);
+		_y = MathUtilities.removeLessEpsilon(y);
 	}
 
 	/**
@@ -58,67 +65,90 @@ public class Point implements Comparable<Point>
 	}
 
 	@Override
-	public int hashCode() {
+	public int hashCode()
+	{
 		return Double.valueOf(MathUtilities.removeLessEpsilon(_x)).hashCode() +
 			   Double.valueOf(MathUtilities.removeLessEpsilon(_y)).hashCode();
 	}
 
 	/**
-	 * Compares the x coordinates first. If they are equal, then we compare the y coordinates.
+	 * 
 	 * @param p1 Point 1
 	 * @param p2 Point 2
 	 * @return Lexicographically: p1 < p2 return -1 : p1 == p2 return 0 : p1 > p2 return 1
-	 **/
-	public static int LexicographicOrdering(Point p1, Point p2) {
-	    if (p1.getX() < p2.getX())
-	        return -1;
-	    else if (p1.getX() > p2.getX())
-	        return 1;
-	    else {
-	        if (p1.getY() < p2.getY())
-	            return -1;
-	        else if (p1.getY() > p2.getY())
-	            return 1;
-	        else
-	            return 0;
-	    }
-	}
-	
-	/**
-	 * 
-	 * @param first Point 1
-	 * @param second Point 2
-	 * @return the distance between two given points
+	 *         Order of X-coordinates first; order of Y-coordinates second
 	 */
-	public static double distance(Point first, Point second)
+	public static int LexicographicOrdering(Point p1, Point p2)
 	{
-		double changeX = Math.pow(first.getX() - second.getX(), 2);
-		double changeY = Math.pow(first.getY() - second.getY(), 2);
-		return Math.sqrt(changeX + changeY);
+		if (p1 == null && p2 == null) {
+			return 0;
+		} else if (p1 == null) {
+			return -1;
+		} else if (p2 == null) {
+			return 1;
+		}
+		
+		if (MathUtilities.doubleLessThan(p1._x, p2._x)) return -1;
+		if (MathUtilities.doubleGreaterThan(p1._x, p2._x)) return 1;
+
+		if (MathUtilities.doubleLessThan(p1._y, p2._y)) return -1;
+		if (MathUtilities.doubleGreaterThan(p1._y, p2._y)) return 1;
+
+		return 0;
 	}
 
 	@Override
-	public int compareTo(Point that) {
+	public int compareTo(Point that)
+	{
 		if (that == null) return 1;
+
 		return Point.LexicographicOrdering(this, that);
 	}
 	
 	/**
-	 * @param obj: point being compared.
-	 * @return true id the objects are equal, false otherwise.
-	 **/
+	 * Determines if this point equals a given point.
+	 * Two points are equal if they share the same
+	 * x-values and y-values. Name does not matter.
+	 * 
+	 * @param obj -- the given points
+	 * @return boolean -- if the points are equal
+	 */
 	@Override
-	public boolean equals(Object obj) {
-		if(!(obj instanceof Point)) return false;
+	public boolean equals(Object obj)
+	{
+		if (!(obj instanceof Point)) {
+			return false;
+		}
+		
+		Point that = (Point) obj;
 
-		if(this == obj) return true;
-
-		Point point = (Point) obj;
-		return MathUtilities.doubleEquals(this.getX(), point.getX())&&
-				MathUtilities.doubleEquals(this.getY(), point.getY());
+		return MathUtilities.doubleEquals(_x, that.getX()) && MathUtilities.doubleEquals(_y, that.getY());
 	}
-	
+
+	@Override
 	public String toString() {
-		return getName() + "[" + getX() + ", " + getY() + "]";
+		String outName = _name;
+		String outX = _x + "";
+		String outY = _y + "";
+    	
+		// Formatting
+		// ----------------------------------------------------------------
+		// check if outname points to ANONYMOUS for empty name of point
+		if (outName == ANONYMOUS) {
+			outName = "";
+		}
+		
+		// removes ".0" from integers stored as doubles for x-value
+		if (_x == (int) _x) {
+			outX = (int) _x + "";
+		}
+		
+		// removes ".0" from integers stored as doubles for y-value
+		if (_y == (int) _y) {
+			outY = (int) _y + "";
+		}
+		// ----------------------------------------------------------------
+		
+    	return outName + "(" + outX + ", " + outY + ")";
 	}
 }

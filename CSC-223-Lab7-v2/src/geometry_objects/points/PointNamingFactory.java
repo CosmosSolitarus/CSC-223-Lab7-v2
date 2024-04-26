@@ -1,35 +1,31 @@
 package geometry_objects.points;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import input.components.exception.NotInDatabaseException;
 /**
- * Stores Point classes and gives them a name from A > Z every time the Point lacks a name.
- * Once Z is past it will return the beginning, but add another letter(AA, AAA, AAAA).
- * @author Jackson Tedesco, Case Riddle, Della Avent
- * @data 3/24/2024
- */
-
-/*
  * Given a pair of coordinates; generate a unique name for it;
  * return that point object.
  *
  * Names go from A..Z..AA..ZZ..AAA...ZZZ  (a name such as ABA does not occur)
  * 
+ * @author	Jack, Sage
+ * @date	3/26/24
  */
 public class PointNamingFactory
 {
 	// Prefix associated with each generated name so those names are easily distinguishable
 	private static final String _PREFIX = "*_";
+	private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-	// Constants reflecting our naming characters for generated names.
-	private static final char START_LETTER = 'A';
+    // Constants reflecting our naming characters for generated names.
+	// private static final char START_LETTER = 'A';		// never used
 	private static final char END_LETTER = 'Z';
 
-	//
-	// the number of characters in the generated names:
+    //
+    // the number of characters in the generated names:
 	// "A" and 1 -> "A"
 	// "B" and 3 -> "BBB"
 	//
@@ -56,9 +52,10 @@ public class PointNamingFactory
 	 */
 	public PointNamingFactory(List<Point> points)
 	{
-		this();
-		for(Point _point: points) {
-			put(_point);
+		_database = new LinkedHashMap<>();
+
+		for (Point point : points) {
+			put(point);
 		}
 	}
 
@@ -66,37 +63,18 @@ public class PointNamingFactory
 	 * Overloaded add / lookup mechanism for this database.
 	 *
 	 * @param pt -- a Point object (may or may not be named)
-
+	 
 	 * @return THE point object in the database corresponding to its coordinate pair
-	 * the object in the database if it already exists or
-	 * a completely new point that has been added to the database
+                    * the object in the database if it already exists or
+					* a completely new point that has been added to the database
 	 */
 	public Point put(Point pt)
 	{
-		if(pt == null) throw new NullPointerException();
-		
-		if(_database.containsKey(pt)) {
-			if(isGeneratedName(_database.get(pt).getName())) {
-				_database.remove(pt);
-			}
-			else {
-				return _database.get(pt);
-			}
-		}
-		
-		if(pt.isUnnamed() || isGeneratedName(pt.getName())) {
-			pt._name = getCurrentName();
-		}
-		
-		//checks for repeat names
-		for(Point _point: _database.keySet()) {
-			if(_point.getName().equals(pt.getName())) {
-				pt._name = getCurrentName();
-			}
+		if (pt._name == Point.ANONYMOUS) {
+			return put(getCurrentName(), pt.getX(), pt.getY());
 		}
 
-		_database.put(pt, pt);
-		return pt;
+		return put(pt.getName(), pt.getX(), pt.getY());
 	}
 
 	/**
@@ -106,12 +84,12 @@ public class PointNamingFactory
 	 * @param y -- single coordinate
 
 	 * @return THE point object in the database corresponding to its coordinate pair
-	 * the object in the database if it already exists or
-	 * a completely new point that has been added to the database (with generated name)
+                    * the object in the database if it already exists or
+					* a completely new point that has been added to the database (with generated name)
 	 */
 	public Point put(double x, double y)
 	{
-		return put(new Point(x, y));
+		return put(getCurrentName(), x, y);
 	}
 
 	/**
@@ -134,21 +112,26 @@ public class PointNamingFactory
 	 */
 	public Point put(String name, double x, double y)
 	{
-		return put(new Point(name, x, y));
-	}
-	
-	/**
-	 * Determines if a name is a generated name
-	 * @param name: name tested
-	 * @return True if generated name; False if not
-	 */
-	private boolean isGeneratedName(String name) {
-		if(name.length() > 1) {
-			if(name.substring(0, 2).equals(_PREFIX)) return true;
-		}
+		Point pt = new Point(name, x, y);
 		
-		return false;
-	}
+		// completely new point is added
+		if (!contains(pt)) {
+			_database.put(pt, pt);
+			return pt;
+		}
+
+		pt = _database.get(pt);
+
+		// valid name overwrites unnamed name
+		if (pt._name.substring(0, 2).equals(_PREFIX)) {
+			_database.remove(pt);
+
+			pt._name = name;
+			_database.put(pt, pt);
+		}
+
+		return _database.get(pt);
+	}    
 
 	/**
 	 * Strict access (read-only of the database)
@@ -156,25 +139,20 @@ public class PointNamingFactory
 	 * @param x
 	 * @param y
 	 * @return stored database Object corresponding to (x, y) 
-	 * @throws NotInDatabaseException 
 	 */
-	public Point get(double x, double y) throws NotInDatabaseException
+	public Point get(double x, double y)
 	{
 		return get(new Point(x, y));
 	}	
-
-	/**
-	 * @param pt: point to be retrieved 
-	 * @return point equivalent to pt in the PointNamingFactory
-	 * @throws NotInDatabaseException 
-	 */
-	public Point get(Point pt) throws NotInDatabaseException
+	public Point get(Point pt)
 	{
-		if(pt == null) throw new NullPointerException();
-		
-		if(contains(pt)) return _database.get(pt);
+		Set<Point> points = _database.keySet();
 
-		throw new NotInDatabaseException(); 
+		for (Point point : points) {
+			if (point.equals(pt)) return point;
+		}
+
+		return null;
 	}
 
 	/**
@@ -183,11 +161,6 @@ public class PointNamingFactory
 	 * @return simple containment; no updating
 	 */
 	public boolean contains(double x, double y) { return contains(new Point(x, y)); }
-	
-	/**
-	 * @param p: Point being tested
-	 * @return True if PointNamingFactory contains p; False if not
-	 */
 	public boolean contains(Point p) { return _database.containsKey(p); }
 
 	/**
@@ -196,15 +169,16 @@ public class PointNamingFactory
 	 *
 	 * This method should also invoke updating of the current name
 	 * to reflect the 'next' name in the sequence.
-	 *	 
+     *	 
 	 * @return the next complete name in the sequence including prefix.
 	 */
 	private String getCurrentName()
 	{
-		String tmpName = _PREFIX + _currentName.repeat(_numLetters);
+        String out = _PREFIX + _currentName;
+
 		updateName();
-		
-		return tmpName;
+
+		return out;
 	}
 
 	/**
@@ -213,49 +187,42 @@ public class PointNamingFactory
 	 */
 	private void updateName()
 	{
-		if(_currentName.equals("" + END_LETTER)) {
-			
-			_currentName = "" + START_LETTER;
-			_numLetters++;
-			
-		}else {
-			char charName = _currentName.charAt(0);
+		char canonical = _currentName.charAt(0);
 
-			charName++;
-			_currentName = "" + charName;
+		int indexOfNextChar = (ALPHABET.indexOf(canonical) + 1) % ALPHABET.length();
+		char c = ALPHABET.charAt(indexOfNextChar);
+
+		if (canonical == END_LETTER) _numLetters++;
+		int n = _numLetters;
+
+		_currentName = "";
+
+		for (int i = 0; i < n; i++) {
+			_currentName += c;
 		}
 	}
 
 	/**
-	 * @return The entire database of points in a Set.
+	 * @return The entire database of points.
 	 */
-	public  Set<Point> getAllPoints()
+	public Set<Point> getAllPoints()
 	{
-		return _database.keySet();
+        return _database.keySet();
 	}
 
-	/**
-	 * clears the PointNamingFactory
-	 */
 	public void clear() { _database.clear(); }
-
-	/**
-	 * @return size of PointNamingFactory
-	 */
 	public int size() { return _database.size(); }
 
-	/**
-	 * @return String version of PointNamingFactory
-	 */
 	@Override
 	public String toString()
 	{
-		StringBuilder sb = new StringBuilder();
+        String out = "";
+		Set<Point> allPoints = getAllPoints();
 
-		for(Point pt: _database.keySet()) {
-			sb.append(pt.getName() + "(" + pt.getX() + ", " + pt.getY() + ")\n");
+		for (Point point : allPoints) {
+			out += point.toString() + "\n";
 		}
 
-		return sb.toString();
+		return out;
 	}
 }

@@ -7,8 +7,6 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import input.components.exception.NotInDatabaseException;
-
 public class PointNamingFactoryTest {
     @Test
     public void sizeTest() {
@@ -57,33 +55,13 @@ public class PointNamingFactoryTest {
         assertEquals(new Point(-1, 2), pnf.put(new Point(-1, 2)));
         assertEquals(3, pnf.size());
 
-        try {
-            assertFalse(pnf.get(pt0).isGenerated());
-        } catch (NotInDatabaseException e) {
-            e.printStackTrace();
-        }
-        
-        try {
-            assertFalse(pnf.get(pt1).isGenerated());
-        } catch (NotInDatabaseException e) {
-            e.printStackTrace();
-        }
+        assertFalse(pnf.get(pt0).isGenerated());
+        assertFalse(pnf.get(pt1).isGenerated());
 
-        try {
-            System.out.println(pnf.get(pt2)._name);
-        } catch (NotInDatabaseException e) {
-            e.printStackTrace();
-        }
-        try {
-            assertTrue(pnf.get(pt2).isGenerated());
-        } catch (NotInDatabaseException e) {
-            e.printStackTrace();
-        }
-        try {
-            assertEquals(pnf.get(pt2)._name, "*_A");
-        } catch (NotInDatabaseException e) {
-            e.printStackTrace();
-        }
+        System.out.println(pnf.get(pt2));
+
+        assertTrue(pnf.get(pt2).isGenerated());
+        assertEquals(pnf.get(pt2)._name, "*_A");
     }
 
     @Test
@@ -140,11 +118,7 @@ public class PointNamingFactoryTest {
 
         pnf.put(pt0);
 
-        try {
-            assertEquals(pt0, pnf.get(-2, 0.337));
-        } catch (NotInDatabaseException e) {
-            e.printStackTrace();
-        }
+        assertEquals(pt0, pnf.get(-2, 0.337));
 
     }
 
@@ -170,11 +144,7 @@ public class PointNamingFactoryTest {
         pts.add(pt3);
 
         for (Point pt : pts) {
-            try {
-                assertEquals(pt, pnf.get(pt));
-            } catch (NotInDatabaseException e) {
-                e.printStackTrace();
-            }
+            assertEquals(pt, pnf.get(pt));
         }
     }
 
@@ -267,16 +237,8 @@ public class PointNamingFactoryTest {
 
             pnf.put(pt);
 
-            try {
-                assertTrue(pnf.get(pt).isGenerated());
-            } catch (NotInDatabaseException e) {
-                e.printStackTrace();
-            }
-            try {
-                assertEquals(pnf.get(pt)._name, "*_" + String.valueOf(ALPHABET.charAt(i % len)).repeat((i / len) + 1));
-            } catch (NotInDatabaseException e) {
-                e.printStackTrace();
-            }
+            assertTrue(pnf.get(pt).isGenerated());
+            assertEquals(pnf.get(pt)._name, "*_" + String.valueOf(ALPHABET.charAt(i % len)).repeat((i / len) + 1));
         }
     }
 }
